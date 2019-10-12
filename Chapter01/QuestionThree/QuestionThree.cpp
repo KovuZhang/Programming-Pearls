@@ -10,23 +10,46 @@ int a[1 + N / BITSPERWORD];	// ÓÃintÀàÐÍÊý×é´æ´¢ËùÓÐÔªËØ£¬Ã¿¸öbit´æ´¢±íÊ¾Ò»¸öÔªË
 /**
  * 32 = 2^5 => ×ª»»Îª¶þ½øÖÆ¾ÍÊÇ1Ç°Ãæ5¸ö0£¬ÒòÎª¶þ½øÖÆÊÇ´Ó2^0¿ªÊ¼ => 100000
  * 32/32 = 1 => 32Óë32Ïà³ýµÈÓÚ1£¬´Ó¶þ½øÖÆ½Ç¶È¿´£¬µÈÓÚÓÒÒÆ5Î» => 000001
+ *
  * ÓÉÉÏ¿ÉÖª£¬Èç¹ûÒ»¸öÊýµÄ¶þ½øÖÆÊýÇ°5Î»¶¼ÊÇ0£¬ÄÇÃ´Õâ¸öÊýÒ»¶¨ÊÇ32µÄ±¶Êý£¬ÄÜ±»32Õû³ý£¬¶øÇÒÕû³ýµÄ½á¹ûÎª¶þ½øÖÆÓÒÒÆ5Î»ºóµÄ½á¹û
  * Í¬Ñù£¬Èç¹ûÒ»¸öÊý²»ÄÜ±»32Õû³ý£¬ÄÇÃ´Õâ¸öÊýµÄ¶þ½øÖÆÊýÇ°5Î»Ò»¶¨²»¶¼ÊÇ0£¬¶øÇÒ£¬¶þ½øÖÆÊýµÄÇ°5Î»ÎªÕâ¸öÊýÓë32Ïà³ýºóµÄÓàÊý£¬¶þ½øÖÆÊýÓÒÒÆ5Î»µÄ½á¹ûÎªÕâ¸öÊýÓë32Ïà³ýºóµÄÉÌ
- * i ±íÊ¾ÐèÒª½øÐÐ²Ù×÷µÄµÚ i ¸ö¶ÔÏó
- * i >> SHIFT Ïàµ±ÓÚ i/32£¬¿ÉÒÔ½« i ¶¨Î»µ½¾ßÌåµÄÊý×éÖÐ
- * i & MASK Ïàµ±ÓÚ i % 32£¬¿ÉÒÔÈ¡ i µÄ¶þ½øÖÆÇ°ÎåÎ»£¬
+ *
+ * ¶Ô³Ë·¨¶øÑÔ£¬1*32 = 32 => 1Óë32Ïà³ËµÈÓÚ32£¬´Ó¶þ½øÖÆ½Ç¶È¿´£¬µÈÓÚ×óÒÆ5Î»£¬¼´ÔÚ×ó±ß¼Ó5¸ö0 => 000001 -> 100000
+ *
+ * ×Ü½á£º¶ÔÓÚÎ»ÔËËã£¬Ò»¸ö¶þ½øÖÆÊý×óÒÆµÈÓÚ³ËÒÔ2µÄ±¶Êý£¬ÓÒÒÆµÈÓÚ³ýÒÔ2µÄ±¶Êý¡£×óÒÆnÎ»µÈÓÚ³ËÒÔ2µÄn´Î·½£¬ÓÒÒÆnÎ»µÈÓÚ³ýÒÔ2µÄn´Î·½¡£ÆäÖÐ£¬¶ÔÓÚÓÒÒÆ²Ù×÷£¬¶þ½øÖÆÊýÓÒÒÆÇ°µÄÇ°nÎ»Îª³ýºóµÄÓàÊý£¬ÓÒÒÆºóµÄ½á¹ûÎª³ýºóµÄÉÌ¡£
  */
-void set(int i)
+
+
+/**
+ * i ±íÊ¾ÐèÒª½øÐÐ²Ù×÷µÄµÚ i ¸ö¶ÔÏó
+ * i >> SHIFT Ïàµ±ÓÚ i/32£¬½« i ¶¨Î»µ½¾ßÌåµÄÊý×éÖÐ
+ * i & MASK Ïàµ±ÓÚ i % 32£¬È¡ i µÄ¶þ½øÖÆÇ°ÎåÎ»£¬¼´³ýÒÔ32ºóµÄÓàÊý£¬ÔÚ±¾´Î32Î»intÀàÐÍµÄ¶ÔÏóÖÐ´¦ÓÚµÚ¼¸Î»£¬½«1×óÒÆÓàÊýÎ»Ö¸´Ó32Î»¶þ½øÖÆÎ»µÄË³ÐòÉÏ½«¶ÔÓ¦Î»ÖÃµÄ±ÈÌØÎ»ÉèÎª1£¨ÓàÊý²»¿ÉÄÜÎª32£¬Òò´ËÓàÊýÊÇ0~31£©
+ */
+
+
+/**
+ * a[i >> SHIFT] µÄÖµµÄ¶þ½øÖÆÊý³õÊ¼Çé¿öÏÂÎª0£¬£¨i << (i&MASK)£©½«¶ÔÓ¦Î»µÄ¶þ½øÖÆÖµÉèÖÃÎ»1£¬Óë a[i >> SHIFT] ½øÐÐ '|' »ò²Ù×÷ºó£¬£¨i << (i&MASK)£©½«¶ÔÓ¦Î»µÄ¶þ½øÖÆÖµµÃÒÔ±£Áô¡£
+ */
+// ÉèÖÃ±ÈÌØÎ»
+void setBit(int i)
 {
 	a[i >> SHIFT] |= (1 << (i&MASK));
 }
 
-void clr(int i)
+/**
+ * £¨i << (i&MASK)£©½«¶ÔÓ¦Î»µÄ¶þ½øÖÆÖµÉèÖÃÎ»1£¬È¡·´ºó¶ÔÓ¦Î»Îª0£¬ÆäËûÎ»Îª1¡£Óë a[i >> SHIFT] ½øÐÐ '&' Óë²Ù×÷ºó£¬½«Çå³ý£¨i << (i&MASK)£©¶ÔÓ¦Î»£¬¼´½«¶þ½øÖÆÖµÐÞ¸ÄÎª0¡£
+ */
+// Çå³ý±ÈÌØÎ»
+void clearBit(int i)
 {
 	a[i >> SHIFT] &= ~(1 << (i&MASK));
 }
 
-int test(int i)
+/**
+ * £¨i << (i&MASK)£©½«¶ÔÓ¦Î»µÄ¶þ½øÖÆÖµÉèÖÃÎ»1£¬È¡·´ºó¶ÔÓ¦Î»Îª0£¬ÆäËûÎ»Îª1¡£Óë a[i >> SHIFT] ½øÐÐ '&' Óë²Ù×÷ºó£¬½«Çå³ý£¨i << (i&MASK)£©¶ÔÓ¦Î»£¬¼´½«¶þ½øÖÆÖµÐÞ¸ÄÎª0¡£
+ */
+// ÅÐ¶Ï¸ÃÔªËØÊÇ·ñ´æÈëÊý×é
+int testBit(int i)
 {
 	return a[i >> SHIFT] & (1 << (i&MASK));
 }
