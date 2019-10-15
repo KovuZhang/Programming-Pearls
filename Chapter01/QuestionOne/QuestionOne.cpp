@@ -3,33 +3,51 @@
 
 #include "pch.h"
 #include <iostream>
+#include <ctime>
 #include <set>
+
+#define N 10000000
+
+int randint(int x, int y)
+{
+	srand((unsigned)time(NULL));
+	return (RAND_MAX*rand() + rand()) % (y - x + 1) + x;
+}
+
+void setValue(int * x)
+{
+	for (int i = 0; i < N; i++)
+	{
+		x[i] = i;
+	}
+
+	for (int i = 0; i < N; i++)
+	{
+		int original = i;
+		int randNum = randint(i, N - 1);
+		std::swap(x[original], x[randNum]);
+	}
+}
 
 int main()
 {
 	std::set<int> s;
 	std::set<int>::iterator j;
-	const int num = 9999999;
+	
+	int numbers[N];
+	setValue(numbers);
 
-    std::cout << "Hello World!\n"; 
-
-	for (int i = num; i > 1000000; i--)
+	clock_t start = clock();
+	for (int i = 0; i < N / 10; i++)
 	{
-		s.insert(i);
-
-		/*if (i%100000 == 0)
-		{
-			std::cout << i << std::endl;
-		}*/
+		s.insert(numbers[i]);
 	}
 
-	std::cout << "size: " << s.size() << std::endl;
+	clock_t finish = clock();
 
-	for (j = s.begin(); j != s.end(); j++)
-	{
-		std::cout << *j << std::endl;
-	}
+	std::cout << "Sort Number: " << (double)(finish - start) / CLOCKS_PER_SEC << " seconds" << std::endl;
 
+	getchar();
 	return 0;
 }
 

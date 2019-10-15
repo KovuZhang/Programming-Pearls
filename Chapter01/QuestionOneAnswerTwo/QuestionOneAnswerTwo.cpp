@@ -1,35 +1,57 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <algorithm>
+
+#define N 10000000
 
 int intcomp(const void *x, const void *y)
 {
 	return *(int*)x - *(int*)y;
 }
 
-int a[1000000];
+int a[N / 10];
+
+int randint(int x, int y)
+{
+	srand((unsigned)time(NULL));
+	return (RAND_MAX*rand() + rand()) % (y - x + 1) + x;
+}
+
+void setValue(int * result)
+{
+	int temp[N];
+
+	for (int i = 0; i < N; i++)
+	{
+		temp[i] = i;
+	}
+
+	for (int i = 0; i < N; i++)
+	{
+		int original = i;
+		int randNum = randint(i, N - 1);
+		std::swap(temp[original], temp[randNum]);
+	}
+
+	for (int i = 0; i < N / 10; i++)
+	{
+		result[i] = temp[i];
+	}
+}
 
 int main(void)
 {
-	int n = 0;
+	setValue(a);
 	
-	printf("Hello World\n");
+	clock_t start = clock();
+	qsort(a, N / 10, sizeof(int), intcomp);
+	clock_t finish = clock();
 
-	for (int i = 9999999; i > 9000000; i--)
-	{
-		a[n] = i;
-		n++;
-		if (i % 10000 == 0)
-		{
-			printf("%d %d\n", a[n-1], n-1);
-		}
-	}
-	
-	qsort(a, n, sizeof(int), intcomp);
+	double duration = (double)(finish - start) / CLOCKS_PER_SEC;
 
-	for (int i = 0; i < n; i++)
-	{
-		printf("%d\n", a[i]);
-	}
+	printf("Sort Number: %f seconds\n", duration);
 
+	getchar();
 	return 0;
 }

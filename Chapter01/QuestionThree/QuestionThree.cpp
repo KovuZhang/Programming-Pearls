@@ -1,9 +1,12 @@
-#include <stdio.h>
-
-#define BITSPERWORD 32	// ¼ÙÉèµ±Ç°»úÆ÷intÀàÐÍÕ¼ÓÃ 32 bit
+#define BITSPERWORD 32	// ¼ÙÉèµ±Ç°»úÆ÷intÀàÐÍÕ¼ÓÃ 32 bit = 4 Byte
 #define SHIFT 5	// 32 = 2^5		 32ÊÇ2µÄ5´Î·½
 #define MASK 0x1F	// ×ª»»Îª¶þ½øÖÆ£º11111
 #define N 10000000	// ÔªËØ¸öÊý
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <algorithm>
+#include <time.h>
 
 int a[1 + N / BITSPERWORD];	// ÓÃintÀàÐÍÊý×é´æ´¢ËùÓÐÔªËØ£¬Ã¿¸öbit´æ´¢±íÊ¾Ò»¸öÔªËØ
 
@@ -28,7 +31,7 @@ int a[1 + N / BITSPERWORD];	// ÓÃintÀàÐÍÊý×é´æ´¢ËùÓÐÔªËØ£¬Ã¿¸öbit´æ´¢±íÊ¾Ò»¸öÔªË
 
 
 /**
- * a[i >> SHIFT] µÄÖµµÄ¶þ½øÖÆÊý³õÊ¼Çé¿öÏÂÎª0£¬£¨i << (i&MASK)£©½«¶ÔÓ¦Î»µÄ¶þ½øÖÆÖµÉèÖÃÎ»1£¬Óë a[i >> SHIFT] ½øÐÐ '|' »ò²Ù×÷ºó£¬£¨i << (i&MASK)£©½«¶ÔÓ¦Î»µÄ¶þ½øÖÆÖµµÃÒÔ±£Áô¡£
+ * a[i >> SHIFT] µÄÖµµÄ¶þ½øÖÆÊý³õÊ¼Çé¿öÏÂÎª0£¬£¨1 << (i&MASK)£©½«¶ÔÓ¦Î»µÄ¶þ½øÖÆÖµÉèÖÃÎ»1£¬Óë a[i >> SHIFT] ½øÐÐ '|' »ò²Ù×÷ºó£¬£¨1 << (i&MASK)£©½«¶ÔÓ¦Î»µÄ¶þ½øÖÆÖµµÃÒÔ±£Áô¡£
  */
 // ÉèÖÃ±ÈÌØÎ»
 void setBit(int i)
@@ -37,7 +40,7 @@ void setBit(int i)
 }
 
 /**
- * £¨i << (i&MASK)£©½«¶ÔÓ¦Î»µÄ¶þ½øÖÆÖµÉèÖÃÎ»1£¬È¡·´ºó¶ÔÓ¦Î»Îª0£¬ÆäËûÎ»Îª1¡£Óë a[i >> SHIFT] ½øÐÐ '&' Óë²Ù×÷ºó£¬½«Çå³ý£¨i << (i&MASK)£©¶ÔÓ¦Î»£¬¼´½«¶þ½øÖÆÖµÐÞ¸ÄÎª0¡£
+ * £¨1 << (i&MASK)£©½«¶ÔÓ¦Î»µÄ¶þ½øÖÆÖµÉèÖÃÎ»1£¬È¡·´ºó¶ÔÓ¦Î»Îª0£¬ÆäËûÎ»Îª1¡£Óë a[i >> SHIFT] ½øÐÐ '&' Óë²Ù×÷ºó£¬½«Çå³ý£¨1 << (i&MASK)£©¶ÔÓ¦Î»£¬¼´½«¶þ½øÖÆÖµÐÞ¸ÄÎª0¡£
  */
 // Çå³ý±ÈÌØÎ»
 void clearBit(int i)
@@ -46,10 +49,70 @@ void clearBit(int i)
 }
 
 /**
- * £¨i << (i&MASK)£©½«¶ÔÓ¦Î»µÄ¶þ½øÖÆÖµÉèÖÃÎ»1£¬È¡·´ºó¶ÔÓ¦Î»Îª0£¬ÆäËûÎ»Îª1¡£Óë a[i >> SHIFT] ½øÐÐ '&' Óë²Ù×÷ºó£¬½«Çå³ý£¨i << (i&MASK)£©¶ÔÓ¦Î»£¬¼´½«¶þ½øÖÆÖµÐÞ¸ÄÎª0¡£
+ * a[i >> SHIFT] ºÍ£¨1 << (i&MASK)£©×ö'&'Óë²Ù×÷£¬ÒòÎª£¨1 << (i&MASK)£©³ýÁËµÚ£¨i&MASK£©+ 1 Î»Îª 1£¬ÆäËûÎ»¶¼ÊÇ 0.Òò´ËÓë²Ù×÷Ö®ºó a[i >> SHIFT] Ö»»á±£ÁôµÚ£¨i&MASK£©+ 1 Î»µÄÖµ£¬ÆäËûÎ»¶¼»áÊÇ 0.
+ * Òò´ËÖ»ÐèÅÐ¶Ï·µ»ØÖµÊÇ·ñÊÇ 0 ¾Í¿ÉÒÔÖªµÀµÚ£¨i&MASK£©+ 1 Î»ÊÇ·ñÎª 1.
  */
 // ÅÐ¶Ï¸ÃÔªËØÊÇ·ñ´æÈëÊý×é
 int testBit(int i)
 {
 	return a[i >> SHIFT] & (1 << (i&MASK));
+}
+
+// Ëæ»úÑ¡Ôñ x Óë y Ö®¼äµÄÕûÊý
+int randomint(int x, int y)
+{
+	srand((unsigned)time(NULL));
+	return (RAND_MAX*rand() + rand()) % (y - x + 1) + x;
+}
+
+// Éú³ÉÎÄ¼þ
+void setValue(int * x, int len)
+{
+	for (int i = 0; i < len; i++)
+	{
+		x[i] = i;
+	}
+
+	for (int i = 0; i < len; i++)
+	{
+		int original = i;
+		int randNum = randomint(i, len - 1);
+		std::swap(x[original], x[randNum]);
+	}
+}
+
+int main(void)
+{
+	int numbers[10000000];
+
+	clock_t startCreateNumbers = clock();
+	setValue(numbers, 10000000);
+	clock_t finishCreateNumbers = clock();
+
+	double duration = (double)(finishCreateNumbers - startCreateNumbers) / CLOCKS_PER_SEC;
+	printf("Load Numbers: %f seconds\n", duration);
+
+	clock_t start = clock();
+
+	// ³õÊ¼»¯
+	for (int i = 0; i < N; i++)
+	{
+		clearBit(i);
+	}
+
+	// ±£´æÕûÊý
+	for (int i = 0; i < N / 10; i++)
+	{
+		setBit(numbers[i]);
+	}
+
+	clock_t finish = clock();
+
+	// Ê±¼ä¿ªÏú
+	duration = (double)(finish - start) / CLOCKS_PER_SEC;
+
+	printf("Sort Number: %f seconds\n", duration);
+
+	getchar();
+	return 0;
 }
